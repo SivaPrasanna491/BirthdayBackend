@@ -1,5 +1,5 @@
 import { asyncHandler } from "../utils/asyncHandler.util.js";
-import { ApiError } from "../utils/ApiError.util,js";
+import { ApiError } from "../utils/ApiError.util.js";
 import { ApiResponse } from "../utils/ApiResponse.util.js";
 import {Birthday} from "../models/birthday.model.js"
 import mongoose from "mongoose";
@@ -19,7 +19,7 @@ const getUpcomingBirthdays = asyncHandler( async (req, res) => {
         },
         {
             $project: {
-                username: 1,
+                username: "$ownerDetails.username",
                 birthday: 1,
             }
         }
@@ -44,6 +44,7 @@ const registerBirthday = asyncHandler( async (req, res) => {
         throw new ApiError(400, "The birthday already exists");
     }
     const createdBirthday = await Birthday.create({
+        owner: req.user._id,
         birthday
     })
     if(!createdBirthday){
@@ -129,7 +130,7 @@ const getBirthdayById = asyncHandler( async (req, res) => {
     return res
     .status(200)
     .json(
-        new ApiResponse(200, birthday[0], "Birthday fetched successfully")
+        new ApiResponse(200, birthday[0] || null, "Birthday fetched successfully")
     )
 })
 
