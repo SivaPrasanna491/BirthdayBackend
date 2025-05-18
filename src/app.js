@@ -16,9 +16,9 @@ app.use(cookieParser())
 
 
 import { userRouter } from "./routes/user.route.js";
-
-app.use("/api/v2/users", userRouter)
-
+import { birthdayRouter } from "./routes/birthday.route.js";
+app.use("/api/v2/users", userRouter);
+app.use("/api/v2/birthdays", birthdayRouter);
 
 
 export {app}
