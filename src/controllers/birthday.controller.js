@@ -21,6 +21,35 @@ const getUpcomingBirthdays = asyncHandler( async (req, res) => {
             $project: {
                 username: "$ownerDetails.username",
                 birthday: 1,
+                // Add daysLeft field: days until next birthday
+                daysLeft: {
+                    $let: {
+                        vars: {
+                            today: { $dateTrunc: { date: new Date(), unit: "day" } },
+                            thisYearBirthday: {
+                                $dateFromParts: {
+                                    year: { $year: new Date() },
+                                    month: { $month: "$birthday" },
+                                    day: { $dayOfMonth: "$birthday" }
+                                }
+                            }
+                        },
+                        in: {
+                            $cond: [
+                                { $gte: ["$$thisYearBirthday", "$$today"] },
+                                { $divide: [ { $subtract: ["$$thisYearBirthday", "$$today"] }, 1000 * 60 * 60 * 24 ] },
+                                { $divide: [ { $subtract: [
+                                    { $dateFromParts: {
+                                        year: { $add: [ { $year: new Date() }, 1 ] },
+                                        month: { $month: "$birthday" },
+                                        day: { $dayOfMonth: "$birthday" }
+                                    } },
+                                    "$$today"
+                                ] }, 1000 * 60 * 60 * 24 ] }
+                            ]
+                        }
+                    }
+                }
             }
         }
     ])
